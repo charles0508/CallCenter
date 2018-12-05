@@ -1,62 +1,26 @@
-# Vökuró
+# callApi呼叫中心接口
 
-This is a sample application for the [Phalcon Framework](https://github.com/phalcon/cphalcon).
-We expect to implement as many features as possible to showcase the framework and its potential.
+项目基于phalcon框架开发，项目正常运行需要先装好phalcon环境
 
-Please write us if you have any feedback.
+官方phalcon Git地址(https://github.com/phalcon/cphalcon).
+安装phalcon
+http://note.youdao.com/noteshare?id=08dbd5363818e36cf03330f2ae00fe44
 
-Thanks.
+## 注意
 
-## NOTE
+主分支将始终包含最新的稳定版本。如果您想查看当前正在开发的旧版本或更新版本，请切换到相关分支
 
-The master branch will always contain the latest stable version.
-If you wish to check older versions or newer ones currently under development, please switch to the relevant branch.
+## 准备
 
-## Get Started
+### 要求
 
-### Requirements
-
-To run this application on your machine, you need at least:
+要在您的计算机上运行此应用程序，您至少需要：:
 
 * >= PHP 5.5
 * >= Phalcon 3.0
-* Apache Web Server with `mod_rewrite enabled`, and `AllowOverride Options` (or `All`) in your `httpd.conf` or Nginx Web Server
-* Latest [Phalcon Framework](https://github.com/phalcon/cphalcon) extension installed/enabled
+* 在您的或Nginx Web服务器中使用mod_rewrite enabled和AllowOverride Options（或All）的Apache httpd.confWeb服务器
+* 安装/启用最新的Phalcon Framework扩展
 * MySQL >= 5.1.5
 
-Then you'll need to create the database and initialize schema:
-
-```bash
-echo 'CREATE DATABASE callApi' | mysql -u root
-cat schemas/callApi.sql | mysql -u root callApi
-```
-
-Also you can override application config by creating `app/config/config.dev.php` (already gitignored).
-
-### Installing Dependencies via Composer
-
-Vökuró's dependencies must be installed using Composer. Install composer in a common location or in your project:
-
-```bash
-curl -s http://getcomposer.org/installer | php
-```
-
-Run the composer installer:
-
-```bash
-cd callApi
-php composer.phar install
-```
-
-**NOTE** After the installation, please ensure that the following folders have write permissions set:
-- `cache`
-
-## Improving this Sample
-
-Phalcon is an open source project and a volunteer effort.
-Vökuró does not have human resources fully dedicated to the maintenance of this software.
-If you want something to be improved or you want a new feature please submit a Pull Request.
-
-## License
-
-Vökuró is open-sourced software licensed under the New BSD License.
+注意安装后，请确保以下文件夹具有写入权限集
+cache，view
