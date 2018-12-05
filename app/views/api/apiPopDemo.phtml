@@ -1,0 +1,25 @@
+<?php echo $this->getContent(); ?>
+<?php $extension = isset($_REQUEST['extension'])?$_REQUEST['extension']:$extension; ?>
+<!--来电弹屏-->
+<script type="text/javascript" src="<?php echo WEB_URL?>api/popWindow?ExtenNo=<?php echo $extension?>&mixdebug=on"></script>
+<div class="container">
+    <div class="pop_head">
+        <span class="pop_title">电话弹屏</span>
+        <span style="cursor: pointer;float: right;padding-right:10px;" onclick="location.href='<?php echo WEB_URL?>admin/index'"> &nbsp;首页</span>
+    </div>
+    <div style="overflow: hidden; border: 1px solid gray; margin-bottom: 5px; margin-top: 5px;">
+        <textarea style="width: 100%; height: 400px; font-size: 12px; border: none;">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>URL弹屏演示</title>
+    <script type="text/javascript" src="<?php echo WEB_URL?>public/js/jquery-3.3.1.min.js"></script>
+    <script src="<?php echo WEB_URL?>api/popWindow?ExtenNo=<?php echo $extension?>&mixdebug=on"></script>
+</head>
+<body>
+   
+</body>
+</html>
+        </textarea>
+    </div>
+</div>

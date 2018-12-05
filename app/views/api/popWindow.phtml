@@ -1,0 +1,244 @@
+<?php
+extract($call_config);
+/*
+用户传递过来的有效参数如下：
+extension	主叫号码，如果没有传递该参数，则页面不包含flash弹屏程序
+pop_url	 	弹屏地址，如果没有传递该参数，则使用接口配置页面设置的弹屏地址
+pop_type	弹屏时机，如果没有传递该参数，则使用接口配置页面设置的参数，有效值为RING,LINK
+pop_out	 	呼入弹屏还是呼出弹屏，如果没有传递该参数，则使用接口配置页面设置的参数，有效值为All，DialIn，DialOut，''
+open_type	弹屏方式，弹窗口、注册JS回调函数，有效值分别为1,2
+width		弹屏宽度，如100，数字后面不要带PX
+height		弹屏高度
+left		窗口左边
+top			窗口顶部
+mixcallback	JS回调函数名称
+*/
+
+//分机号码
+if(!$extension){exit;}
+//弹屏地址
+$pop_url=isset($request['Url'])&&$request['Url']?$request['Url']:$call_config['mixpopscreen']['pop_url'];
+$pop_url.=strpos($pop_url, '?')===false?'?':'&';
+
+//弹屏时机，振铃弹屏或接通弹屏
+$pop_type=isset($request['Type'])?$request['Type']:$call_config['mixpopscreen']['pop_type'];
+//弹屏方式
+$call_config['mixpopscreen']['open_type']=isset($OpenType)?$OpenType:$call_config['mixpopscreen']['open_type'];
+//JS回调函数名称
+$call_config['mixpopscreen']['mixcallback']=isset($request['CallBackFunc'])?$request['CallBackFunc']:$call_config['mixpopscreen']['mixcallback'];
+//呼入呼出弹屏
+if(isset($request['pop_out'])){
+	//接收用户传递过来的弹屏参数
+	$PopInOut=$request['pop_out'];
+}else{
+	//如果用没有传递参数，则使用接口配置页面配置的信息
+	if($call_config['mixpopscreen']['pop_up_when_dial_in']){
+		if($call_config['mixpopscreen']['pop_up_when_dial_out']){
+			$PopInOut='All';
+		}else{
+			$PopInOut='DialIn';
+		}
+	}else{
+		if($call_config['mixpopscreen']['pop_up_when_dial_out']){
+			$PopInOut='DialOut';
+		}else{
+			$PopInOut='';
+		}
+	}	
+}
+//如果当前配置是弹新窗口，但呼入呼出弹屏都设为了否，那么页面就不用包含flash弹屏程序了。
+if($PopInOut==''&&$call_config['mixpopscreen']['open_type']!=2){exit;}
+//mixproxy服务器地址
+$server=$call_config['common']['cchost'];
+//mixproxy服务器端口
+$port=$call_config['common']['mixproxyport'];
+$portArr=explode(',', $port);
+$port=$portArr[$extension%count($portArr)];
+//心跳时长
+$ping=isset($request['ping'])?$request['ping']:$call_config['common']['ping'];
+//防止加载冲突
+echo "var ajaxdidUrl='".WEB_URL."api/';";
+?>
+alert(123456);
+var jxstr='';
+//同步限时获取DID
+function popScreen(str){
+	jxstr = str;
+	var Callerid=mixGetStr(str,"Callerid: ","\r");
+	var Method=mixGetStr(str,"Method: ","\r");
+	var params='action=getdid&num='+Callerid+'&callback=?';
+	//呼入获取did号码
+	if(Method=='Dialin'){
+		if(jxstr.indexOf('DID')==-1){
+			jQuery.ajax({
+				type:'GET',
+				url:ajaxdidUrl,
+				dataType:'jsonp',
+				jsonp:'callback',
+				data:params,
+				success:function(responseData){
+					if(jQuery.browser.mozilla) console.log("DID: "+responseData.data+"\r\n"+jxstr);
+					if(responseData.result=='1'){
+						PopScreen("DID="+responseData.data+"\r\n"+jxstr);
+					}else{
+						PopScreen(jxstr);
+					}
+				}
+			});
+		}else{
+			PopScreen(jxstr);
+		}
+	}else{
+		PopScreen(jxstr);
+	}
+}
+function mixGetStr(string, start, end){	   	
+	var str="";
+	if(string.indexOf(start)!=-1){
+		var StaNum=string.indexOf(start)+start.length;
+		var EndNum=string.indexOf(end,StaNum);
+		if(EndNum!=-1){
+			str=string.substring(StaNum,EndNum);
+		}
+	}
+	return str;
+}
+function mixStr2Url(str){
+    str = str.substr(0,str.length-4);//去掉最后4个字符\r\n\r\n
+    str = str.replace(/: /g,"=");
+    str = str.replace(/\r\n/g,"&");
+    return str;
+}
+function PopScreen(str){
+    //弹屏号码长度限制
+    var phone_number_length="<?php echo $call_config['mixpopscreen']['phone_number_length'];?>";
+    //弹屏方式：弹窗口、调用JS回调函数
+    var open_type="<?php echo $call_config['mixpopscreen']['open_type'];?>";
+    var Callerid=mixGetStr(str,"Callerid: ","\r");
+    var Calleeid=mixGetStr(str,"Calleeid: ","\r");
+    var Method=mixGetStr(str,"Method: ","\r");
+    var CalleridIndex;
+    var CalleeidIndex;
+    str=mixStr2Url(str);
+    var para=str.split("&");
+    for(var n=0; n < para.length; n++){
+    	if(para[n].substr(0,8)=='Callerid'){
+            CalleridIndex=n;
+       	}else if(para[n].substr(0,8)=='Calleeid'){
+            CalleeidIndex=n;
+        }
+   	}
+    var prefix='<?php echo $call_config['mixpopscreen']['trim_prefix']?>';
+    var prefixArr=prefix.split(',');
+    var replaceLength=0;
+    var replaceString='';
+	if(Method=='Dialin'){
+        if(Callerid.length < phone_number_length)return;
+        for(i=0; i < prefixArr.length; i++){
+            if(Callerid.indexOf(prefixArr[i])==0 && prefixArr[i].length>replaceLength){
+                replaceLength=prefixArr[i].length
+                replaceString=prefixArr[i];
+            }
+        }
+        if(replaceString){
+        	Callerid=Callerid.replace(replaceString,'');
+            para[CalleridIndex]='Callerid='+Callerid;
+            str=para.join('&');
+        }     
+   	}else{
+        //呼出
+        if(Calleeid.length < phone_number_length)return;
+        for(i=0; i<prefixArr.length; i++){
+            if(Calleeid.indexOf(prefixArr[i])==0 && prefixArr[i].length>replaceLength){
+                replaceLength=prefixArr[i].length
+                replaceString=prefixArr[i];
+            }
+        }
+        if(replaceString){
+        	Calleeid=Calleeid.replace(replaceString,'');
+            para[CalleeidIndex]='Calleeid='+Calleeid;
+            str=para.join('&');
+        }
+	}
+	var open_url="<?php echo $pop_url;?>"+str;
+	if(open_type=="1"){
+		//弹出新窗口
+		var width="<?php echo $call_config['mixpopscreen']['win_width'];?>";
+		var height="<?php echo $call_config['mixpopscreen']['win_height'];?>";
+		var left="<?php echo $call_config['mixpopscreen']['win_left'];?>";
+		var top="<?php echo $call_config['mixpopscreen']['win_top'];?>";
+        var resizable="<?php echo $call_config['mixpopscreen']['win_resizable'];?>";
+        var scrollbars="<?php echo $call_config['mixpopscreen']['win_scrollbars'];?>";
+		window.open (open_url, "", "height="+height+", width="+width+", top="+top+", left="+left+", toolbar=no, menubar=no, scrollbars="+scrollbars+", resizable="+resizable+", location=no, status=no");
+	}else if(open_type=="2"){
+		//注册JS回调函数
+        try{
+            if(typeof(eval(<?php echo $call_config['mixpopscreen']['mixcallback']?>))=="function"){
+            	var json = str.split("&");
+		var jsonString = "{";
+		for(i = 0; i < json.length; i++) {
+		var arr = json[i].split("=");
+		switch(arr[0]){
+			case 'Callerid':
+				jsonString += '"CallerNo":"'+arr[1]+'", ';
+				break;
+			case 'Calleeid':
+				jsonString += '"CalledNo":"'+arr[1]+'", ';
+				break;
+			case 'Uniqueid':
+				jsonString += '"CallUuId":"'+arr[1]+'", ';
+				break;
+			case 'DateTime':
+				jsonString += '"'+arr[0]+'":"'+arr[1]+'", ';
+				break;
+			case 'Method':
+				var calltype = arr[1] == 'Dialout' ? 'out' : 'in';
+				jsonString += '"CallType":"'+calltype+'", ';
+				break;
+			}
+		}
+		jsonString = (jsonString.substring(jsonString.length-2)==', ')?jsonString.substring(0,jsonString.length-2):jsonString;
+		jsonString += "}";
+		<?php echo $call_config['mixpopscreen']['mixcallback']?>(jsonString);        
+            }
+		}catch(e){
+            jQuery("body").append('<div id="mixcallback_error" style="position: fixed; left: 0; top: 0; width: 150px; background: #9CF; padding: 2px 5px; font-size: 12px; z-index: 999;">回调函数<?php $call_config['mixpopscreen']['mixcallback']?>未定义</div>');
+            setTimeout(function(){
+            	jQuery("#mixcallback_error").fadeOut('', function(){jQuery(this).remove();});
+            }, 5000);
+        }	
+	}
+}
+jQuery(function(){
+<?php
+if(isset($mode) && $mode=='on'){
+	$mixdebugW='500';
+	$mixdebugH='400';
+}else{
+	$mixdebugW='0';
+	$mixdebugH='0';		
+}
+$str='
+<object style="margin-left:-99990px;" classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" codebase="http://fpdownload.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,0,0" width="'.$mixdebugW.'" height="'.$mixdebugH.'" id="FlashVars" align="middle"> 
+<param name="allowScriptAccess" value="always" /> 
+<param name="movie" value="'.WEB_URL.'public/swf/popscreen.swf" /> 
+<param name="quality" value="high" /> 
+<param name="bgcolor" value="#ffffff" /> 
+<param name="FlashVars" value="ServerIP='.$server.'&ServerPort='.$port.'&Extension='.$extension.'&PopInOut='.$PopInOut.'&PopTime='.$pop_type.'&ping='.$ping.'" />
+<embed src="'.WEB_URL.'public/swf/popscreen.swf?ServerIP='.$server.'&ServerPort='.$port.'&Extension='.$extension.'&PopInOut='.$PopInOut.'&PopTime='.$pop_type.'&ping='.$ping.'" 
+quality="high" 
+bgcolor="#ffffff" 
+width="'.$mixdebugW.'" 
+height="'.$mixdebugH.'"
+name="FlashVars" 
+align="middle" 
+allowScriptAccess="always"  
+type="application/x-shockwave-flash" 
+pluginspage="http://www.macromedia.com/go/getflashplayer" /> 
+</object>';
+$str = str_replace("\n", "", $str);
+$str = str_replace("\r", "", $str);
+echo "jQuery('body').append('$str');";
+?>
+});
+

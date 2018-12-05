@@ -1,0 +1,81 @@
+<?php echo $this->getContent(); ?>
+<style type="text/css">
+th{font-weight: bold;}
+td{font-size: 12px;border-collapse: collapse;}
+</style>
+<!--电话控制-->
+<script type="text/javascript" src="<?php echo WEB_URL?>api/control"></script>
+<script type="text/javascript"></script>
+<div class="container">
+<div class="tip"></div>
+  <table class="panel_table" width="100%" cellspacing="0" cellpadding="5" style="margin-top:30px;">
+    <tr class="head">
+      <th colspan="3" style="border:none;">
+        <span>电话面板</span>
+        <span style="cursor: pointer;float: right;" onclick="location.href='<?php echo WEB_URL?>admin/index'"> &nbsp;首页</span>
+        <span style="cursor: pointer;float: right;" onclick="$('.advanced').toggle()">更多 |</span>
+      </th>
+    </tr>
+    <tr class="panel-head">
+      <td width="45%"><b>接口参数</b></td>
+      <td width="15%"><b>接口名称</b></td>
+      <td width="40%"><b>请求结果</b></td>
+    </tr>
+    <tr>
+      <td>分机号码 <input type="text" id="dial1"/>&nbsp;&nbsp;被叫号码 <input type="text" id="dial2"/></td>
+      <td><input name="input" type="button" onclick="dial()" value="电话呼出" /></td>
+      <td><span id="callout_res"></span></td>
+    </tr>
+    <tr>
+      <td>分机号码 <input type="text" id="hangup1"/></td>
+      <td><input name="input12" type="button" onclick="hangup()" value="电话挂断" /></td>
+      <td><span id="hangup_res"></span></td>
+    </tr>
+    <tr>
+      <td>分机号码 <input type="text" id="transfer1"/>&nbsp;&nbsp;目的号码 <input type="text" id="transfer2"/></td>
+      <td><input name="input2" type="button" onclick="transfer()" value="电话转接" /></td>
+      <td><span id="transfer_res"></span></td>
+    </tr>
+    <tr>
+      <td>分机号码 <input type="text" id="busy2"/></td>
+      <td><input name="input5" type="button" onclick="busy2()" value="座席签入" /></td>
+      <td><span id="signin_res"></span></td>
+    </tr>
+    <tr>
+    <tr>
+      <td>分机号码 <input type="text" id="busy1"/></td>
+      <td><input name="input4" type="button" onclick="busy1()" value="座席签出" /></td>
+      <td><span id="signout_res"></span></td>
+    </tr>
+      <td>分机号码 <input type="text" id="busystatus1"/></td>
+      <td><input name="input6" type="button" onclick="busystatus()" value="签入签出状态" /></td>
+      <td><span id="signStatus_res"></span></td>
+    </tr>
+    <tr>
+      <td>分机号码  <input type="text" id="extenstatus1"/></td>
+      <td><input name="input10" type="button" onclick="extenstatus()" value="座席状态" /></td>
+      <td><span id="extenStatus_res"></span></td>
+    </tr>
+    <!--更多-->
+    <tbody class="advanced">
+      <tr>
+        <td>分机号码 <input type="text" id="pickup1"/>&nbsp;&nbsp;目的号码 <input type="text" id="pickup2"/></td>
+        <td><input name="input3" type="button" onclick="pickup()" value="电话拦截" /></td>
+        <td><span id="snatch_res"></span></td>
+      </tr>
+      <tr>
+        <td>分机号码 <input type="text" id="hold1"/></td>
+        <td><input name="input7" type="button" onclick="hold()" value="保持恢复" /></td>
+        <td><span id="hold_res"></span></td>
+      </tr>
+      <tr>
+        <td>分机号码 <input type="text" id="chanspy1"/>&nbsp;&nbsp; 目的号码 <input type="text" id="chanspy2"/></td>
+        <td><input name="input11" type="button" onclick="chanspy()" value="分机监听" /></td>
+        <td><span id="tap_res"></span></td>
+      </tr>
+      </tr>
+    </tbody>
+  </table>
+</div>
+</body>
+</html>

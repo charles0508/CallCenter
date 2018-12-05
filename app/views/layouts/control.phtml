@@ -1,0 +1,315 @@
+<?php
+echo "document.write(\"<span id='singhead_result' style='position:fixed; display:none; padding: 10px 20px; border: 1px solid gray; left:$left; top:$top; width:$width; height:$height; font-size:$font; color:$color; background:$background; '></span>\");
+var isDisplay='$isDisplay';\n";
+?>
+var singheadTimeout=0;
+//电话呼出
+function CallOut(callerid,calleeid,account,dom){
+	jQuery.ajax({
+		type:'POST',
+		url:ajaxUrl+'CallOut',
+		dataType:'json',
+		data:JSON.stringify({'ExtenNo':callerid,'DstNo':calleeid}),
+		success:function(msg){
+			reqResultShow(msg, dom);
+		}
+	});
+}
+//电话挂断
+function HangUp(extension, dom){
+	jQuery.ajax({
+		type:'POST',
+		url:ajaxUrl+'HangUp',
+		dataType:'json',
+		data:JSON.stringify({'ExtenNo':extension}),
+		success:function(msg){
+			reqResultShow(msg, dom);
+		}
+	});
+}
+//电话转接
+function CallTransfer(extension,exten,dom){
+	jQuery.ajax({
+		type:'POST',
+		url:ajaxUrl+'CallTransfer',
+		dataType:'json',
+		data:JSON.stringify({'ExtenNo':extension, 'DstNo':exten}),
+		success:function(msg){
+			reqResultShow(msg, dom);
+		}
+	});
+}
+
+//设置分机示忙状态
+function SignInAndOut(extension, dnd, dom){
+	jQuery.ajax({
+		type:'POST',
+		url:ajaxUrl+'SignInAndOut',
+		dataType:'json',
+		data:JSON.stringify({'ExtenNo':extension, 'SignType':dnd}),
+		success:function(msg){
+			reqResultShow(msg, dom);
+		}
+	});
+}
+
+//获取分机示忙状态
+function CheckSignStatus(extension, dom){
+	jQuery.ajax({
+		type:'POST',
+		url:ajaxUrl+'CheckSignStatus',
+		dataType:'json',
+		data:JSON.stringify({'ExtenNo':extension}),
+		success:function(msg){
+			reqResultShow(msg, dom);
+		}
+	});
+}
+
+//获取分机状态
+function CheckStatus(extension, dom){
+	jQuery.ajax({
+		type:'POST',
+		url:ajaxUrl+'CheckStatus',
+		dataType:'json',
+		data:JSON.stringify({'ExtenNo':extension}),
+		success:function(msg){
+			reqResultShow(msg, dom);
+		}
+	});
+}
+
+//电话拦截
+function Snatch(extension, extensionDst, dom){
+	jQuery.ajax({
+		type:'POST',
+		url:ajaxUrl+'Snatch',
+		dataType:'json',
+		data:JSON.stringify({'ExtenNo':extension, 'ExtenNoDest':extensionDst}),
+		success:function(msg){
+			reqResultShow(msg, dom);
+		}
+	});
+}
+
+//通话保持(保持恢复交替进行)
+function HoldAndRecover(extension, dom){
+	jQuery.ajax({
+		type:'POST',
+		url:ajaxUrl+'HoldAndRecover',
+		dataType:'json',
+		data:JSON.stringify({'ExtenNo':extension}),
+		success:function(msg){
+			reqResultShow(msg, dom);
+		}
+	});
+}
+
+//分机监听	b监听，w密语
+function TapPhone(extension,extensionDst,option, dom){
+	jQuery.ajax({
+		type:'POST',
+		url:ajaxUrl+'HoldAndRecover',
+		dataType:'json',
+		data:JSON.stringify({'ExtenNo':extension, 'DstNo':extensionDst, 'Action':option}),
+		success:function(msg){
+			reqResultShow(msg, dom);
+		}
+	});
+}
+//获取队列信息
+function singheadQueueInfo(queue){
+	var params='a=queueinfo&queue='+queue+'&callback=?';
+	jQuery.ajax({
+		type:'GET',
+		url:ajaxUrl,
+		dataType:'jsonp',
+		jsonp:'callback',
+		data:params,
+		success:function(msg){			
+			singheadResultOperate(msg, 'singheadQueueInfoCallback');
+		}
+	});
+}
+//获取语音留言信息
+function singheadVoiceMail(extension){
+	var params='a=voicemail&extension='+extension+'&callback=?';
+	jQuery.ajax({
+		type:'GET',
+		url:ajaxUrl,
+		dataType:'jsonp',
+		jsonp:'callback',
+		data:params,
+		success:function(msg){
+			singheadResultOperate(msg, 'singheadVoiceMailCallback');
+		}
+	});
+}
+
+//更改呼叫等待状态	status：1启用，0禁用
+function singheadSetCallWait(extension,status){
+	var params='a=callwait&extension='+extension+'&status='+status+'&callback=?';
+	jQuery.ajax({
+		type:'GET',
+		url:ajaxUrl,
+		dataType:'jsonp',
+		jsonp:'callback',
+		data:params,
+		success:function(msg){
+			singheadResultOperate(msg, 'singheadSetCallWaitCallback');
+		}
+	});
+}
+//获取示忙类型列表
+function singheadBusyTypeList(){
+	var params='a=busytypelist&callback=?';
+	jQuery.ajax({
+		type:'GET',
+		url:ajaxUrl,
+		dataType:'jsonp',
+		jsonp:'callback',
+		data:params,
+		success:function(msg){
+			singheadResultOperate(msg, 'singheadBusyTypeListCallback');
+		}
+	});
+}
+//获取放音列表
+function singheadAnnList(){
+	var params='a=annlist&callback=?';
+	jQuery.ajax({
+		type:'GET',
+		url:ajaxUrl,
+		dataType:'jsonp',
+		jsonp:'callback',
+		data:params,
+		success:function(msg){
+			singheadResultOperate(msg, 'singheadAnnListCallback');
+		}
+	});
+}
+//获取IVR列表
+function singheadIvrList(){
+	var params='a=ivrlist&callback=?';
+	jQuery.ajax({
+		type:'GET',
+		url:ajaxUrl,
+		dataType:'jsonp',
+		jsonp:'callback',
+		data:params,
+		success:function(msg){
+			singheadResultOperate(msg, 'singheadIvrListCallback');
+		}
+	});
+}
+//获取队列列表
+function singheadQueueList(){
+	var params='a=queuelist&callback=?';
+	jQuery.ajax({
+		type:'GET',
+		url:ajaxUrl,
+		dataType:'jsonp',
+		jsonp:'callback',
+		data:params,
+		success:function(msg){
+			singheadResultOperate(msg, 'singheadQueueListCallback');
+		}
+	});
+}
+//发送DTMF信号
+function singheadSendDTMF(extension,digits,interval){
+	var params='a=senddtmf&extension='+extension+'&digits='+digits+'&interval='+interval+'&callback=?';
+	jQuery.ajax({
+		type:'GET',
+		url:ajaxUrl,
+		dataType:'jsonp',
+		jsonp:'callback',
+		data:params,
+		success:function(msg){
+			singheadResultOperate(msg, 'singheadSendDTMFCallback');
+		}
+	});
+}
+//获取分机通道变量
+function singheadGetVar(extension,variable){
+	var params='a=getvar&extension='+extension+'&variable='+variable+'&callback=?';
+	jQuery.ajax({
+		type:'GET',
+		url:ajaxUrl,
+		dataType:'jsonp',
+		jsonp:'callback',
+		data:params,
+		success:function(msg){
+			singheadResultOperate(msg, 'singheadGetVarCallback');
+		}
+	});
+}
+//设置分机通道变量	variable: name=singhead option: self本通道，peer对方通道
+function singheadSetVar(extension,variable,option){
+	if(typeof(option)=='undefined')option='self';
+	var params='a=setvar&extension='+extension+'&variable='+variable+'&option='+option+'&callback=?';
+	jQuery.ajax({
+		type:'GET',
+		url:ajaxUrl,
+		dataType:'jsonp',
+		jsonp:'callback',
+		data:params,
+		success:function(msg){
+			singheadResultOperate(msg, 'singheadSetVarCallback');
+		}
+	});
+}
+//多方通话
+function singheadConference(extension,number,room){
+	if(typeof(extension)=='undefined')extension='';
+	if(typeof(number)=='undefined')number='';
+ 	if(typeof(room)=='undefined')room=''; 
+    var params='a=conference&extension='+extension+'&number='+number+'&room='+room+'&callback=?';
+	jQuery.ajax({
+		type:'GET',
+		url:ajaxUrl,
+		dataType:'jsonp',
+		jsonp:'callback',
+		data:params,
+		success:function(msg){
+			singheadResultOperate(msg, 'singheadConferenceCallback');
+		}
+	});
+}
+//多方通话踢出成员
+function singheadKickConference(room,extension){
+	if(typeof(room)=='undefined')room=''; 
+	if(typeof(extension)=='undefined')extension='';
+    var params='a=kickConference&extension='+extension+'&room='+room+'&callback=?';
+	jQuery.ajax({
+		type:'GET',
+		url:ajaxUrl,
+		dataType:'jsonp',
+		jsonp:'callback',
+		data:params,
+		success:function(msg){
+			singheadResultOperate(msg, 'singheadKickConferenceCallback');
+		}
+	});
+}
+//判断字符串是否为纯数字
+function singehadIsNumber(oNum){ 
+	if(!oNum) return false; 
+	var strP=/^\d+(\.\d+)?$/; 
+	if(!strP.test(oNum)) return false; 
+	try{ 
+		if(parseFloat(oNum)!=oNum) return false; 
+	} catch(ex) { 
+		return false; 
+	} 
+	return true;
+}
+//显示操作结果
+function reqResultShow(str, dom){
+	var result = JSON.stringify(str);
+	if(str.Response == 200){
+		document.getElementById(dom).innerHTML = '<font color="green">'+result+'</font>';
+	}else{
+		document.getElementById(dom).innerHTML = '<font color="red">'+result+'</font>';
+	}
+}
