@@ -2,8 +2,10 @@
 
 项目基于phalcon框架开发，项目正常运行需要先装好phalcon环境
 
-官方phalcon Git地址(https://github.com/phalcon/cphalcon).
+官方phalcon Git地址(https://github.com/phalcon/cphalcon)
+
 安装phalcon
+
 http://note.youdao.com/noteshare?id=08dbd5363818e36cf03330f2ae00fe44
 
 ## 注意
@@ -17,6 +19,7 @@ http://note.youdao.com/noteshare?id=08dbd5363818e36cf03330f2ae00fe44
 要在您的计算机上运行此应用程序，您至少需要：:
 
 * >= PHP 5.5
+
 * >= Phalcon 3.0
 * 在您的或Nginx Web服务器中使用mod_rewrite enabled和AllowOverride Options（或All）的Apache httpd.confWeb服务器
 * 安装/启用最新的Phalcon Framework扩展
